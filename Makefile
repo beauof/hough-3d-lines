@@ -31,7 +31,7 @@ TGZDIR = hough3d-src
 all: $(PROGRAM)
 
 $(PROGRAM): $(PROGRAM).o $(OBJECTS)
-	$(CC) -o $@ $+ $(LDFLAGS)
+	$(CC) -o bin/$@ $+ $(LDFLAGS)
 
 $(PROGRAM).o: $(PROGRAM).cpp
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $*.cpp
@@ -46,7 +46,7 @@ test: testdata.dat $(PROGRAM)
 	$(PROGRAM) $< -dx 0.4
 
 clean:
-	rm -f *.o $(PROGRAM)
+	rm -f *.o bin/$(PROGRAM)
 
 tgz:
 	ln -s . $(TGZDIR)
