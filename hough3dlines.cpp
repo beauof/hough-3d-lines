@@ -316,7 +316,7 @@ int main(int argc, char ** argv) {
     else if (opt_outformat == format_pc_dir) {
       for (uint i = 0; i < Y.points.size(); i++) {
         fprintf(outfile, "%f %f %f %f %f %f\n",
-                Y.points.at(i).x, Y.points.at(i).y + X.shift.y, Y.points.at(i).z + X.shift.z,
+                Y.points.at(i).x + X.shift.x, Y.points.at(i).y + X.shift.y, Y.points.at(i).z + X.shift.z,
                 b.x, b.y, b.z);
       }
     }
