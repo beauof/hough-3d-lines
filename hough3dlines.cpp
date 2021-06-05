@@ -87,7 +87,7 @@ int main(int argc, char ** argv) {
   double opt_dx = 0.0;
   int opt_nlines = 0;
   int opt_minvotes = 0;
-  enum Outformat { format_normal, format_gnuplot, format_raw };
+  enum Outformat { format_normal, format_gnuplot, format_raw, format_pc_dir };
   Outformat opt_outformat = format_normal;
   char opt_delim = ',';
   int opt_verbose = 0;
@@ -130,6 +130,9 @@ int main(int argc, char ** argv) {
     }
     else if (0 == strcmp(argv[i], "-raw")) {
       opt_outformat = format_raw;
+    }
+    else if (0 == strcmp(argv[i], "-pc-dir")) {
+      opt_outformat = format_pc_dir;
     }
     else if (0 == strcmp(argv[i], "-delim")) {
       i++;
@@ -237,7 +240,7 @@ int main(int argc, char ** argv) {
     hough = new Hough(minPshifted, maxPshifted, opt_dx, granularity);
   } catch (const std::exception &e) {
     fprintf(stderr, "Error: cannot allocate memory for %.0f Hough cells"
-            " (%.2f MB)\n", num_cells, 
+            " (%.2f MB)\n", num_cells,
             (double(num_cells) / 1000000.0) * sizeof(unsigned int));
     return 2;
   }
@@ -260,7 +263,7 @@ int main(int argc, char ** argv) {
     fprintf(outfile, "%f %f %f %f %f %f\n%f %f\n",
             minP.x, maxP.x, minP.y, maxP.y, minP.z, maxP.z, -d, d);
   }
-  
+
   // iterative Hough transform
   // (Algorithm 1 in IPOL paper)
   PointCloud Y;	// points close to line
@@ -306,20 +309,27 @@ int main(int argc, char ** argv) {
               "with lines notitle lc rgb 'black'",
               a.x, b.x, a.y, b.y, a.z, b.z);
     }
-    else {
+    else if (opt_outformat == format_raw) {
       fprintf(outfile, "%f %f %f %f %f %f %lu\n",
               a.x, a.y, a.z, b.x, b.y, b.z, Y.points.size());
+    }
+    else if (opt_outformat == format_pc_dir) {
+      for (uint i = 0; i < Y.points.size(); i++) {
+        fprintf(outfile, "%f %f %f %f %f %f\n",
+                Y.points.at(i).x, Y.points.at(i).y + X.shift.y, Y.points.at(i).z + X.shift.z,
+                b.x, b.y, b.z);
+      }
     }
 
     X.removePoints(Y);
 
-  } while ((X.points.size() > 1) && 
+  } while ((X.points.size() > 1) &&
            ((opt_nlines == 0) || (opt_nlines > nlines)));
 
   // final newline in gnuplot command
   if (opt_outformat == format_gnuplot)
     fputs("\n", outfile);
-  
+
   // clean up
   delete hough;
   if (outfile_name) fclose(outfile);
